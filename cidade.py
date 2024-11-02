@@ -1,6 +1,6 @@
 from ligar_connect import connection
 
-class Cliente:
+class Cidade:
     def __init__(self, cod_cliente, data_insc, endereco, telefone, tipo_cliente):
         self.cod_cliente = cod_cliente
         self.data_insc = data_insc
@@ -22,5 +22,6 @@ class Cliente:
             cursor.close() ## Encerra a conexão
             print("Cliente cadastrado com sucesso!")
         except Exception as e:
+            connection.rollback()  # Reverte a transação para limpar o erro
             print(f"Erro ao cadastrar o cliente: {e}")
 
