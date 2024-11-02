@@ -1,5 +1,5 @@
 import streamlit as st
-from funcoes import inserir_cliente
+from funcoes import Cliente
 
 # Configurando o tema padrão
 st.set_page_config(
@@ -23,7 +23,14 @@ with st.form(key="include_cliente"):
     
 
     if input_cliente_button_submit:  #(Se o input_botton_submit for True = Apertado)
-        inserir_cliente(input_cod_cliente, input_data_insc, input_endereco, input_telefone, input_tipo_cliente)
+        cliente = Cliente(
+            cod_cliente=input_cod_cliente,
+            data_insc=input_data_insc,
+            endereco=input_endereco,
+            telefone=input_telefone,
+            tipo_cliente=input_tipo_cliente
+        )
+        cliente.inserir_cliente()
         #ClienteController.Incluir(cliente)
         st.success('Cadastrado com sucesso!', icon="✅")
 #else:
