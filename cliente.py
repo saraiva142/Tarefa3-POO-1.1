@@ -1,4 +1,5 @@
 from ligar_connect import connection
+import pandas as pd
 
 class Cliente:
     def __init__(self, cod_cliente, data_insc, endereco, telefone, tipo_cliente):
@@ -60,4 +61,21 @@ class Cliente:
         except Exception as e:
             connection.rollback()
             print(f"Erro ao cadastrar a pessoa jurídica: {e}")
+    
+    @staticmethod
+    def obter_clientes():
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT Cod_Cli, Data_Insc, Endereco, Telefone, Tipo_Cliente FROM Cliente;")
+            rows = cursor.fetchall()
+            colnames = [desc[0] for desc in cursor.description]  # Nome das colunas
+            cursor.close()
+
+            # Converter os dados para DataFrame do Pandas
+            clientes_df = pd.DataFrame(rows, columns=colnames)
+            return clientes_df
+
+        except Exception as e:
+            print(f"Erro ao obter clientes: {e}")
+            return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
 
