@@ -78,4 +78,35 @@ class Cliente:
         except Exception as e:
             print(f"Erro ao obter clientes: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
+    
+    @staticmethod
+    def obter_pessoas_fisicas():
+        try:
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT Cod_Cli, Nome_Cli AS Nome, CPF
+                FROM Pessoa_Fisica;
+            """)
+            rows = cursor.fetchall()
+            colnames = [desc[0] for desc in cursor.description]
+            cursor.close()
+            return pd.DataFrame(rows, columns=colnames)
+        except Exception as e:
+            print(f"Erro ao obter dados de pessoas físicas: {e}")
+            return pd.DataFrame()
 
+    @staticmethod
+    def obter_pessoas_juridicas():
+        try:
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT Cod_Cli, Razao_Social, Insc_Estadual, CNPJ
+                FROM Pessoa_Juridica;
+            """)
+            rows = cursor.fetchall()
+            colnames = [desc[0] for desc in cursor.description]
+            cursor.close()
+            return pd.DataFrame(rows, columns=colnames)
+        except Exception as e:
+            print(f"Erro ao obter dados de pessoas jurídicas: {e}")
+            return pd.DataFrame()

@@ -79,7 +79,24 @@ with tab1:
             st.dataframe(dados_clientes)
         else:
             st.write("Nenhum cliente encontrado na tabela.")
+        
+    # Filtro para visualizar Pessoas Físicas ou Jurídicas
+    st.subheader("Visualizar Pessoas")
+    tipo_cliente = st.selectbox("Selecione o tipo de cliente para visualização", ["Pessoa Física", "Pessoa Jurídica"])
 
+    if st.button("Atualizar Dados de Pessoas"):
+        if tipo_cliente == "Pessoa Física":
+            dados_pessoas_fisicas = Cliente.obter_pessoas_fisicas()
+            if not dados_pessoas_fisicas.empty:
+                st.dataframe(dados_pessoas_fisicas)
+            else:
+                st.write("Nenhum registro encontrado para pessoas físicas.")
+        elif tipo_cliente == "Pessoa Jurídica":
+            dados_pessoas_juridicas = Cliente.obter_pessoas_juridicas()
+            if not dados_pessoas_juridicas.empty:
+                st.dataframe(dados_pessoas_juridicas)
+            else:
+                st.write("Nenhum registro encontrado para pessoas jurídicas.")
         
 
 with tab2:
