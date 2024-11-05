@@ -2,6 +2,8 @@ import streamlit as st
 from cliente import Cliente
 from estado import Estado
 from cidade import Cidade
+from funcionario import Funcionario
+from frete import Frete
 
 # Configurando o tema padrão
 st.set_page_config(
@@ -173,7 +175,88 @@ with tab3:
 with tab4:
     st.title("CRUD FUNCIONÁRIO")
     ## FAZER A PARTE DO FUNCIONÁRIO AQUI
+    with st.form(key="include_funcionario"):
+        st.write("Preencher Tabela Funcionario")
+        input_numero_funcionario = st.number_input(label="Insira o número do funcionário", format="%s")
+        input_nome_funcionario = st.text_input(label="Insira o nome do Funcionário")
+        input_funcionario_button_submit = st.form_submit_button(label="Enviar")
+        
+
+        if input_funcionario_button_submit:  #(Se o input_botton_submit for True = Apertado)
+            funcionario = Funcionario(
+                num_reg=input_numero_funcionario,
+                nome_func=input_nome_funcionario
+            )
+            funcionario.inserir_funcionario()
+            #ClienteController.Incluir(cliente)
+            st.success('Funcionário Cadastrado com sucesso!', icon="✅")
+    #else:
+    #    st.error("É preciso preencher todos os campos")
+    # Visualização de dados da tabela Estado
+    st.subheader("Visualizar Funcionários Cadastrados")
+    if st.button("Atualizar Dados Funcionários"):
+        dados_funcionarios = Funcionario.obter_funcionarios()
+        if not dados_funcionarios.empty:
+            st.dataframe(dados_funcionarios)
+        else:
+            st.write("Nenhum estado encontrado na tabela.")
     
 with tab5:
     st.title("CRUD FRETE")
+    
+    with st.form(key="include_frete"):
+        st.write("Preencher Tabela Frete")
+        input_numero_conhecimento = st.number_input(label="Insira o Numero de conhecimento do frete", format="%s")
+        input_peso_frete = st.text_input(label="Insira o peso do Frete")
+        input_valor = st.text_input(label="Insira o valor do Frete")
+        input_pedagio = st.text_input(label="Insira o valor do Pedagio do Frete")
+        input_icms_frete = st.text_input(label="Insira o icms do Frete")
+        input_data_frete = st.text_input(label="Insira a data do Frete")
+        input_nome_quem_vai_pagar = st.text_input(label="Insira o nome de quem vai pagar o Frete")
+        
+        # input_peso_ou_valor = st.text_input(label="Insira se vai ser peso ou valor o Frete")
+
+        input_peso_ou_valor = st.radio(
+          "Escolha o metodo de calculo do frete 👇",
+          ["peso", "valor"],
+          key="choise",
+        )
+  
+        # input_cidade_origem = st.text_input(label="Insira a cidade de origem do Frete")
+        dados_cidades = Cidade.obter_cidades()
+
+        # opcoes_cidades = [(cidade.codigo_cid, cidade.nome_cid) for cidade in dados_cidades]
+
+        opcoes_cidades = list(zip(dados_cidades["codigo_cid"], dados_cidades["nome_cid"]))
+        
+        cidade_selecionada = st.selectbox(
+          "Selecione a cidade de origem", 
+          opcoes_cidades, 
+          format_func=lambda x: x[1]
+        )
+        # cidade_origem_selecionada = st.text_input(label="Insira a cidade de origem do Frete")
+        input_cidade_destino = st.text_input(label="Insira a cidade de destino do Frete")
+        input_remetente_frete = st.text_input(label="Insira o remetente do Frete")
+        input_destinatario = st.text_input(label="Insira o destinatario do Frete")
+        input_frete_button_submit = st.form_submit_button(label="Enviar")
+        
+        if input_frete_button_submit:  #(Se o input_botton_submit for True = Apertado)
+            frete = Frete(
+                num_conhec=input_numero_conhecimento,
+                peso=input_peso_frete,
+                valor=input_valor,
+                pedagio=input_pedagio,
+                icms=input_icms_frete,
+                data_frete=input_data_frete,
+                quem_paga=input_nome_quem_vai_pagar,
+                peso_ou_valor=input_peso_ou_valor,
+                origem_cid=cidade_origem_selecionada,
+                destino_cid=input_cidade_destino,
+                remetente_cli=input_remetente_frete,
+                destinatario_cli=input_destinatario,
+            )
+            frete.inserir_frete()
+            #ClienteController.Incluir(cliente)
+            st.success('Frete Cadastrado com sucesso!', icon="✅")
+
     ## FAZER A PARTE DO FUNCIONÁRIO AQUI
