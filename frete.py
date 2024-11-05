@@ -23,9 +23,9 @@ class Frete:
             cursor.execute(
                 """
                 INSERT INTO frete (Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli)
-                VALUES (%s, %s, %s, %s, %s);
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-                (self.num_conhec, self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.icms, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli)
+                (self.num_conhec, self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli)
             )
             connection.commit()
             cursor.close() ## Encerra a conexão
