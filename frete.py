@@ -33,3 +33,20 @@ class Frete:
         except Exception as e:
             connection.rollback()  # Reverte a transação para limpar o erro
             print(f"Erro ao cadastrar o frete: {e}")
+              
+    @staticmethod
+    def obter_fretes():
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli FROM Frete;")
+            rows = cursor.fetchall()
+            colnames = [desc[0] for desc in cursor.description]  # Nome das colunas
+            cursor.close()
+
+            # Converter os dados para DataFrame do Pandas
+            fretes_df = pd.DataFrame(rows, columns=colnames)
+            return fretes_df
+
+        except Exception as e:
+            print(f"Erro ao obter fretes: {e}")
+            return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro

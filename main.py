@@ -16,6 +16,10 @@ st.title('Tarefa 3 - POO Em Banco de Dados :game_die:')
 st.write('Alunos: João Saraiva - Walison Matheus - Arthur Rodrigues - Rodrigo Barros')
 st.write('Professor: Joriver')
 
+url = "https://github.com/saraiva142/Tarefa3-POO-1.1"
+
+st.markdown("[Código fonte GitHub](%s)" % url)
+
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete"])
 
 with tab1:
@@ -75,10 +79,13 @@ with tab1:
         
         # Visualização de dados da tabela Cliente
     st.subheader("Visualizar Clientes Cadastrados")
-    if st.button("Atualizar Dados"):
+    if st.button("Visualizar Dados"):
         dados_clientes = Cliente.obter_clientes()
+          
         if not dados_clientes.empty:
-            st.dataframe(dados_clientes)
+            # st.dataframe(dados_clientes)
+
+            Cliente.exibir_tabela(dados_clientes)
         else:
             st.write("Nenhum cliente encontrado na tabela.")
         
@@ -86,7 +93,7 @@ with tab1:
     st.subheader("Visualizar Pessoas")
     tipo_cliente = st.selectbox("Selecione o tipo de cliente para visualização", ["Pessoa Física", "Pessoa Jurídica"])
 
-    if st.button("Atualizar Dados de Pessoas"):
+    if st.button("Visualizar Dados de Pessoas"):
         if tipo_cliente == "Pessoa Física":
             dados_pessoas_fisicas = Cliente.obter_pessoas_fisicas()
             if not dados_pessoas_fisicas.empty:
@@ -99,6 +106,13 @@ with tab1:
                 st.dataframe(dados_pessoas_juridicas)
             else:
                 st.write("Nenhum registro encontrado para pessoas jurídicas.")
+    if st.button("Excluir cliente"):
+        dados_clientes = Cliente.obter_clientes()
+        #st.write(dados_clientes.columns) Tava debugando essa porra
+
+        Cliente.exibir_tabela(dados_clientes)
+        
+        #st.success('Cliente removido com sucesso!', icon="🤐")
         
 
 with tab2:
@@ -129,7 +143,7 @@ with tab2:
     #    st.error("É preciso preencher todos os campos")
     # Visualização de dados da tabela Estado
     st.subheader("Visualizar Estados Cadastrados")
-    if st.button("Atualizar Dados Estados"):
+    if st.button("Visualizar Dados Estados"):
         dados_estados = Estado.obter_estados()
         if not dados_estados.empty:
             st.dataframe(dados_estados)
@@ -145,7 +159,20 @@ with tab3:
         input_codigo_cid = st.text_input(label="Insira o codigo da cidade")
         input_preco_unit_valor = st.number_input(label="Insira o preco por unidade", step=0.5, format="%.2f")
         input_preco_unit_peso = st.number_input(label="Insira o preco por peso", step=0.5, format="%.2f")
-        input_uf = st.selectbox("Selecione a unidade federativa", ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"])
+        
+        #input_uf = st.selectbox("Selecione a unidade federativa", ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"])
+        dados_estados = Estado.obter_estados()
+
+        # opcoes_cidades = [(cidade.codigo_cid, cidade.nome_cid) for cidade in dados_cidades]
+
+        opcoes_estados = dados_estados["uf"].tolist()
+        
+        input_uf = st.selectbox(
+          "Selecione a unidade federativa", 
+          opcoes_estados
+        )
+        
+        
         input_cidade_button_submit = st.form_submit_button(label="Enviar")
 
         if input_cidade_button_submit:  #(Se o input_botton_submit for True = Apertado)
@@ -166,7 +193,7 @@ with tab3:
             
     # Visualização de dados da tabela Cidade
     st.subheader("Visualizar Cidades Cadastrados")
-    if st.button("Atualizar Dados Cidades"):
+    if st.button("Visualizar Dados Cidades"):
         dados_cidades = Cidade.obter_cidades()
         if not dados_cidades.empty:
             st.dataframe(dados_cidades)
@@ -237,7 +264,7 @@ with tab5:
         )
         # Armazenando o código da cidade de origem
         cidade_origem_selecionada = codigo_cidade_origem[0]
-        print(f'Cidade: {cidade_origem_selecionada}')
+        #Debugar: print(f'Cidade: {cidade_origem_selecionada}')
 
         # cidade_origem_selecionada = st.text_input(label="Insira a cidade de origem do Frete")
         #input_cidade_destino = st.text_input(label="Insira a cidade de destino do Frete")
@@ -249,7 +276,7 @@ with tab5:
         )
         # Armazenando o código da cidade de origem
         input_cidade_destino = codigo_cidade_destino[0]
-        print(f'Cidade: {input_cidade_destino}')
+        # Debugar: print(f'Cidade: {input_cidade_destino}')
         
         
         #input_remetente_frete = st.text_input(label="Insira o remetente do Frete")
@@ -287,5 +314,11 @@ with tab5:
             frete.inserir_frete()
             #ClienteController.Incluir(cliente)
             st.success('Frete Cadastrado com sucesso!', icon="✅")
-
+        st.subheader("Visualizar Fretes Cadastrados")
+    if st.button("Visualizar Dados Fretes"):
+        dados_fretes = Frete.obter_fretes()
+        if not dados_fretes.empty:
+            st.dataframe(dados_fretes)
+        else:
+            st.write("Nenhum frete encontrado na tabela.")
     ## FAZER A PARTE DO FUNCIONÁRIO AQUI
