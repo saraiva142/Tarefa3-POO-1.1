@@ -83,9 +83,9 @@ with tab1:
         dados_clientes = Cliente.obter_clientes()
           
         if not dados_clientes.empty:
-            # st.dataframe(dados_clientes)
+            st.dataframe(dados_clientes)
 
-            Cliente.exibir_tabela(dados_clientes)
+            #Cliente.exibir_tabela(dados_clientes)
         else:
             st.write("Nenhum cliente encontrado na tabela.")
         
@@ -106,13 +106,23 @@ with tab1:
                 st.dataframe(dados_pessoas_juridicas)
             else:
                 st.write("Nenhum registro encontrado para pessoas jurídicas.")
+    
+    # Seleção do cliente para exclusão
+    dados_clientes = Cliente.obter_clientes()
+    meus_clientes = dados_clientes["cod_cli"].to_list()
+    cliente_selecionado = st.selectbox(
+        "Selecione o cliente para excluir", 
+        meus_clientes
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+    
+    # Botão para excluir cliente
     if st.button("Excluir cliente"):
-        dados_clientes = Cliente.obter_clientes()
-        #st.write(dados_clientes.columns) Tava debugando essa porra
-
-        Cliente.exibir_tabela(dados_clientes)
-        
-        #st.success('Cliente removido com sucesso!', icon="🤐")
+        if cliente_selecionado:
+            Cliente.excluir_cliente(cliente_selecionado)  # Chama a função para excluir o cliente
+            #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
+            st.success(f"Cliente {cliente_selecionado} excluído com sucesso!", icon="🤐")
+        else:
+            st.warning("Selecione um cliente para excluir")
         
 
 with tab2:

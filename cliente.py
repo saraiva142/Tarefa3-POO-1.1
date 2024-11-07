@@ -113,47 +113,38 @@ class Cliente:
             return pd.DataFrame()
     
     @staticmethod
-    def excluir_cliente(cod_cliente):
+    def excluir_cliente(cod_cliente):  
         try:
             cursor = connection.cursor()
+            # Primeiro, excluir os registros dependentes das tabelas relacionadas
+            
+            # Excluir da tabela 'Frete' onde o 'Destinatario_Cli' ou 'Remetente_Cli' seja o cod_cliente
             cursor.execute(
-                            """
-                                DELETE FROM cliente WHERE Cod_Cli = %s;
-                                DELETE FROM Pessoa_Fisica WHERE Cod_Cli = %s;
-                                DELETE FROM Pessoa_Juridica WHERE Cod_Cli = %s;
-                            """, (cod_cliente, cod_cliente, cod_cliente)
+                """
+                DELETE FROM Frete WHERE Destinatario_Cli = %s OR Remetente_Cli = %s;
+                """, (cod_cliente, cod_cliente)
             )
+            
+            # Excluir da tabela 'Pessoa_Fisica' e 'Pessoa_Juridica' usando 'Cod_Cli'
+            cursor.execute(
+                """
+                DELETE FROM Pessoa_Fisica WHERE Cod_Cli = %s;
+                DELETE FROM Pessoa_Juridica WHERE Cod_Cli = %s;
+                """, (cod_cliente, cod_cliente)
+            )
+            
+            # Finalmente excluir o cliente da tabela 'cliente'
+            cursor.execute(
+                """
+                DELETE FROM cliente WHERE Cod_Cli = %s;
+                """, (cod_cliente,)
+            )
+        
             connection.commit()
             cursor.close()
-            st.success(f"Cliente {cod_cliente} excluído com sucesso!", icon="🤐")
+            #st.success(f"Cliente {cod_cliente} excluído com sucesso!", icon="🤐")
             print(f"Cliente {cod_cliente} excluído com sucesso no banco de dados.")  # Debugar essa kralha
         except Exception as e:
             connection.rollback()
             st.error(f"Erro ao excluir o cliente: {e}")
             print(f"Erro ao excluir o cliente {cod_cliente}: {e}")  # tbm p debugar porra
-
-    @staticmethod
-    def exibir_tabela(dados_clientes):
-        # Verificar se a coluna 'ID' existe, caso contrário, usar o índice
-        if 'ID' not in dados_clientes.columns:
-            dados_clientes = dados_clientes.reset_index()  # Define o índice como 'ID'
-            dados_clientes.rename(columns={'index': 'ID'}, inplace=True)
-
-        
-        for index, row in dados_clientes.iterrows():
-            col1, col2, col3, col4 = st.columns([3, 3, 1, 1])  # Apenas quatro colunas agora
-
-            # Exibir os dados das colunas
-            col1.write(row['cod_cli'])
-            col2.write(row['data_insc'])
-            col3.write(row['endereco'])
-            col4.write(row['telefone'])
-
-            # Cria um formulário exclusivo para cada cliente com o botão de remover
-            with st.form(key=f"form_remover_{row['cod_cli']}"):
-                # Adiciona um botão de remoção específico para cada cliente
-                remover_button = st.form_submit_button("Remover")
-                if remover_button:
-                    Cliente.excluir_cliente(row['cod_cli'])
-                    st.success(f"Cliente {row['cod_cli']} excluído com sucesso!", icon="✅")
-                    #st.experimental_rerun()  # Força o recarregamento da página para atualizar a tabela
