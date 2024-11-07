@@ -109,18 +109,20 @@ with tab1:
     
     # Seleção do cliente para exclusão
     dados_clientes = Cliente.obter_clientes()
-    meus_clientes = dados_clientes["cod_cli"].to_list()
+    
+    meus_clientes = list(zip(dados_clientes["cod_cli"], dados_clientes["tipo_cliente"], dados_clientes["data_insc"]))
     cliente_selecionado = st.selectbox(
         "Selecione o cliente para excluir", 
-        meus_clientes
+        meus_clientes,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]} - {x[2]}" 
         )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
     
     # Botão para excluir cliente
     if st.button("Excluir cliente"):
         if cliente_selecionado:
-            Cliente.excluir_cliente(cliente_selecionado)  # Chama a função para excluir o cliente
+            Cliente.excluir_cliente(cliente_selecionado[0])  # Chama a função para excluir o cliente
             #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
-            st.success(f"Cliente {cliente_selecionado} excluído com sucesso!", icon="🤐")
+            st.success(f"Cliente {cliente_selecionado[0]} excluído com sucesso!", icon="🤐")
         else:
             st.warning("Selecione um cliente para excluir")
         
