@@ -117,6 +117,8 @@ class Cliente:
             cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
             #print(f"Tentando editar cliente com ID: {self.cod_cliente}") mais debug de corno
             #print("Dados para atualização:", self.data_insc, self.endereco, self.telefone, self.tipo_cliente) # isso era para eu debugar o inferno
+            
+            #Não coloquei para editar o código do cliente pois ao meu ver não faz sentido
 
             cursor.execute("""
                   UPDATE cliente

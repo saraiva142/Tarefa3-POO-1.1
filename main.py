@@ -202,6 +202,25 @@ with tab2:
         else:
             st.write("Nenhum estado encontrado na tabela.")
     
+    # Seleção do cliente para exclusão
+    dados_estados = Estado.obter_estados()
+    
+    meus_estados = list(zip(dados_estados["uf"], dados_estados["nome_est"]))
+    estado_selecionado = st.selectbox(
+        "Selecione o estado para excluir", 
+        meus_estados,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+    
+    # Botão para excluir estado 
+    if st.button("Excluir Estado"):
+        if estado_selecionado:
+            Estado.excluir_estado(estado_selecionado[0])  # Chama a função para excluir o estado
+            #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
+            st.success(f"Estado {estado_selecionado[0]} excluído com sucesso!", icon="🤐")
+        else:
+            st.warning("Selecione um estado para excluir")
+        
     
 with tab3:
     st.title("CRUD CIDADE")
