@@ -106,7 +106,47 @@ with tab1:
                 st.dataframe(dados_pessoas_juridicas)
             else:
                 st.write("Nenhum registro encontrado para pessoas jurídicas.")
+
+    # Seleção do cliente para edição
+    dados_clientes = Cliente.obter_clientes()
     
+    meus_clientes = list(zip(dados_clientes["cod_cli"], dados_clientes["tipo_cliente"], dados_clientes["data_insc"]))
+    cliente_selecionado_edicao = st.selectbox(
+        "Selecione o cliente para editar", 
+        meus_clientes,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]} - {x[2]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+
+    if cliente_selecionado_edicao:
+        cod_cliente = cliente_selecionado_edicao[0]
+        cliente_data_insc = cliente_selecionado_edicao[2]
+        cliente_tipo = cliente_selecionado_edicao[1]
+        
+        with st.form(key="edit_cliente"):
+            st.title(f"Editar Cliente {cliente_selecionado_edicao[0]}")
+            st.write("Preencher Tabela Cliente")
+            #input_cod_cliente =st.number_input(label="Insira o código do cliente", format="%d", step=1, value=cliente_selecionado_edicao[0]) 
+            input_data_insc = st.date_input(label="Insira a data de INSC")
+            input_endereco = st.text_input(label="Insira o endereço")
+            input_telefone = st.number_input(label="Insira um telefone de contato", format="%s")
+            input_tipo_cliente = st.selectbox("Selecione o tipo de cliente", ["Pessoa Fisica", "Pessoa Juridica"])
+            
+            input_cliente_button_submit = st.form_submit_button(label=f"Editar Cliente {cliente_selecionado_edicao[0]}")
+            
+            if input_cliente_button_submit:  #(Se o input_botton_submit for True = Apertado)
+                cliente = Cliente(
+                    cod_cliente=cod_cliente,
+                    data_insc=input_data_insc,
+                    endereco=input_endereco,
+                    telefone=input_telefone,
+                    tipo_cliente=input_tipo_cliente
+                )
+                cliente.editar_cliente()
+                #ClienteController.Incluir(cliente)
+                st.success(f'Cliente {cod_cliente} Editado com sucesso!', icon="✅")
+                #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho
+            
+        
     # Seleção do cliente para exclusão
     dados_clientes = Cliente.obter_clientes()
     

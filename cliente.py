@@ -111,6 +111,31 @@ class Cliente:
         except Exception as e:
             print(f"Erro ao obter dados de pessoas jurídicas: {e}")
             return pd.DataFrame()
+
+    def editar_cliente(self):
+        try:
+            cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
+            #print(f"Tentando editar cliente com ID: {self.cod_cliente}") mais debug de corno
+            #print("Dados para atualização:", self.data_insc, self.endereco, self.telefone, self.tipo_cliente) # isso era para eu debugar o inferno
+
+            cursor.execute("""
+                  UPDATE cliente
+                  SET Data_Insc = %s, Endereco = %s, Telefone = %s, Tipo_Cliente = %s
+                  WHERE Cod_Cli = %s;
+                """,
+               (self.data_insc, self.endereco, self.telefone, self.tipo_cliente, self.cod_cliente)
+            )
+             # Verificar se o comando afetou alguma linha
+            #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
+            if cursor.rowcount == 0:
+                print("Nenhuma linha foi atualizada - verifique se o Cod_Cli existe.")
+
+            connection.commit()
+            cursor.close() ## Encerra a conexão
+            print("Cliente editado com sucesso!")
+        except Exception as e:
+            connection.rollback()  # Reverte a transação para limpar o erro
+            print(f"Erro ao editar o cliente: {e}")      
     
     @staticmethod
     def excluir_cliente(cod_cliente):  
