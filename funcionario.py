@@ -47,5 +47,50 @@ class Funcionario:
         except Exception as e:
             print(f"Erro ao obter funcionarios: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
+    
+    def editar_funcionario(self):
+        try:
+            cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
+        
+            cursor.execute("""
+                  UPDATE funcionario
+                  SET Nome_Func = %s
+                  WHERE Num_Reg = %s;
+                """,
+               (self.nome_func, self.num_reg)
+            )
+             # Verificar se o comando afetou alguma linha
+            if cursor.rowcount == 0: #Isso tbm é mais para debugar (como sempre)
+                print("Nenhuma linha foi atualizada - verifique se o Num_Reg existe.")
+
+            connection.commit()
+            cursor.close() ## Encerra a conexão
+            print("Funcionario editado com sucesso!")
+        except Exception as e:
+            connection.rollback()  # Reverte a transação para limpar o erro
+            print(f"Erro ao editar o funcionario: {e}")      
+    
+    
+    def excluir_funcionario(num_reg):  
+        try:
+            cursor = connection.cursor()
+            # Primeiro, excluir os registros dependentes das tabelas relacionadas - Não tem
+    
+            # Excluir da tabela 'Funcionario'
+            cursor.execute(
+                """
+                DELETE FROM Funcionario WHERE Num_Reg = %s;
+                """, (num_reg,)
+            )
+        
+            connection.commit()
+            cursor.close()
+            
+            print(f"Funcionario {num_reg} excluído com sucesso no banco de dados.")  # Debugar essa kralha
+        except Exception as e:
+            connection.rollback()
+            print(f"Erro ao excluir o estado: {e}")
+            print(f"Erro ao excluir o estado {num_reg}: {e}")  # tbm p debugar porra
+    
 
 

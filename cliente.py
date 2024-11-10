@@ -129,7 +129,7 @@ class Cliente:
             )
              # Verificar se o comando afetou alguma linha
             #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
-            if cursor.rowcount == 0:
+            if cursor.rowcount == 0: #Isso tbm é mais para debugar (como sempre)
                 print("Nenhuma linha foi atualizada - verifique se o Cod_Cli existe.")
 
             connection.commit()

@@ -146,7 +146,7 @@ with tab1:
                 st.success(f'Cliente {cod_cliente} Editado com sucesso!', icon="✅")
                 #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho
             
-        
+    st.title("Excluir Cliente")
     # Seleção do cliente para exclusão
     dados_clientes = Cliente.obter_clientes()
     
@@ -158,7 +158,7 @@ with tab1:
         )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
     
     # Botão para excluir cliente
-    if st.button("Excluir cliente"):
+    if st.button(f"Excluir cliente {cliente_selecionado[0]}"):
         if cliente_selecionado:
             Cliente.excluir_cliente(cliente_selecionado[0])  # Chama a função para excluir o cliente
             #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
@@ -201,7 +201,41 @@ with tab2:
             st.dataframe(dados_estados)
         else:
             st.write("Nenhum estado encontrado na tabela.")
+
+    # Seleção dos estados para edição
+    dados_estados = Estado.obter_estados()
     
+    meus_estados = dados_estados["uf"].tolist()
+    estado_selecionado_edicao = st.selectbox(
+        "Selecione o estado para editar", 
+        meus_estados,  # Passa a lista de tuplas
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+
+    if estado_selecionado_edicao:
+        uf = estado_selecionado_edicao
+        
+        with st.form(key="edit_estado"):
+            st.title(f"Editar Estado {uf}")
+            st.write("Preencher Tabela Estado")
+            #input_uf =st.selectbox("Selecione a unidade federativa", ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"])
+            input_icms_local = st.number_input(label="Insira o ICMS do estado", step=0.5, format="%.2f")
+            input_nome_est = st.text_input(label="Insira o nome do estado")
+            input_icms_outro_uf = st.number_input(label="Insira o ICMS do outro estado", step=0.5, format="%.2f")
+           # input_estado_button_submit = st.form_submit_button(label="Mandar")
+            input_estado_button_submit = st.form_submit_button(label=f"Editar Estado {uf}")
+            
+            if input_estado_button_submit:  #(Se o input_botton_submit for True = Apertado)
+                    estado = Estado(
+                        uf=uf,
+                        icms_local=input_icms_local,
+                        nome_est=input_nome_est,
+                        icms_outro_uf=input_icms_outro_uf
+                    )
+                    estado.editar_estado()
+                    #EstadoController.Incluir(estado)
+                    st.success(f'Estado {uf} Editado com sucesso!', icon="✅")
+                    #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho
+        
     # Seleção do cliente para exclusão
     dados_estados = Estado.obter_estados()
     
@@ -217,7 +251,7 @@ with tab2:
         if estado_selecionado:
             Estado.excluir_estado(estado_selecionado[0])  # Chama a função para excluir o estado
             #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
-            st.success(f"Estado {estado_selecionado[0]} excluído com sucesso!", icon="🤐")
+            st.success(f"Estado {estado_selecionado[0]}{estado_selecionado[1]} excluído com sucesso!", icon="🤐")
         else:
             st.warning("Selecione um estado para excluir")
         
@@ -239,8 +273,8 @@ with tab3:
         opcoes_estados = dados_estados["uf"].tolist()
         
         input_uf = st.selectbox(
-          "Selecione a unidade federativa", 
-          opcoes_estados
+        "Selecione a unidade federativa", 
+        opcoes_estados
         )
         
         
@@ -280,7 +314,7 @@ with tab4:
         input_nome_funcionario = st.text_input(label="Insira o nome do Funcionário")
         input_funcionario_button_submit = st.form_submit_button(label="Enviar")
         
-
+        
         if input_funcionario_button_submit:  #(Se o input_botton_submit for True = Apertado)
             funcionario = Funcionario(
                 num_reg=input_numero_funcionario,
@@ -299,6 +333,56 @@ with tab4:
             st.dataframe(dados_funcionarios)
         else:
             st.write("Nenhum estado encontrado na tabela.")
+            
+    # Seleção do funcioanrio para edição
+    dados_funcionarios = Funcionario.obter_funcionarios()
+    
+    meus_funcionarios = list(zip(dados_funcionarios["num_reg"], dados_funcionarios["nome_func"]))
+    funcionario_selecionado_edicao = st.selectbox(
+        "Selecione o funcionário para editar", 
+        meus_funcionarios,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+
+    with st.form(key="edit_funcionario"):
+            st.title(f"Editar Funcionário {funcionario_selecionado_edicao[0]}")
+            st.write("Preencher Tabela Funcionário")
+            
+            #input_num_reg = st.number_input(label="Insira o número do funcionário", format="%d", value=funcionario_selecionado_edicao[0])
+            input_nome_reg = st.text_input(label="Insira o nome do funcionário")
+            
+            input_funcionario_button_submit = st.form_submit_button(label=f"Editar Funcionário {funcionario_selecionado_edicao[0]}")
+            
+            input_num_reg = funcionario_selecionado_edicao[0]
+            
+            if input_funcionario_button_submit:  #(Se o input_botton_submit for True = Apertado)
+                funcionario = Funcionario(
+                    num_reg=input_num_reg,
+                    nome_func=input_nome_reg
+                )
+                funcionario.editar_funcionario()
+                
+                st.success(f'Funcionário {input_num_reg} Editado com sucesso!', icon="✅")
+        
+    # Seleção do cliente para exclusão
+    dados_funcionarios = Funcionario.obter_funcionarios()
+    
+    meus_funcionarios = list(zip(dados_funcionarios["num_reg"], dados_funcionarios["nome_func"]))
+    funcionario_selecionado = st.selectbox(
+        "Selecione o funcionário para excluir", 
+        meus_funcionarios,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+    
+    # Botão para excluir funcionário 
+    if st.button("Excluir Funcionário"):
+        if funcionario_selecionado:
+            Funcionario.excluir_funcionario(funcionario_selecionado[0])  # Chama a função para excluir o funcionário
+            #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
+            st.success(f"Funcionário {funcionario_selecionado[0]} excluído com sucesso!", icon="🤐")
+        else:
+            st.warning("Selecione um funcionário para excluir")
+        
     
 with tab5:
     st.title("CRUD FRETE")

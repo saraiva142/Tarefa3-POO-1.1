@@ -41,6 +41,33 @@ class Estado:
         except Exception as e:
             print(f"Erro ao obter estados: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
+        
+    def editar_estado(self):
+        try:
+            cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
+            #print(f"Tentando editar cliente com ID: {self.cod_cliente}") mais debug de corno
+            #print("Dados para atualização:", self.data_insc, self.endereco, self.telefone, self.tipo_cliente) # isso era para eu debugar o inferno
+            
+            #Não coloquei para editar o código do cliente pois ao meu ver não faz sentido
+
+            cursor.execute("""
+                UPDATE Estado
+                SET ICMS_Local = %s, Nome_Est = %s, ICMS_Outro_UF = %s
+                WHERE UF = %s;
+                """,
+            (self.icms_local, self.nome_est, self.icms_outro_uf, self.uf)
+            )
+            # Verificar se o comando afetou alguma linha
+            #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
+            if cursor.rowcount == 0: #Isso tbm é mais para debugar (como sempre)
+                print("Nenhuma linha foi atualizada - verifique se o UF existe.")
+
+            connection.commit()
+            cursor.close() ## Encerra a conexão
+            print("Estado editado com sucesso!")
+        except Exception as e:
+            connection.rollback()  # Reverte a transação para limpar o erro
+            print(f"Erro ao editar o estado: {e}")     
 
     @staticmethod
     def excluir_estado(uf):  
