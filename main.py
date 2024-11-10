@@ -305,6 +305,46 @@ with tab3:
         else:
             st.write("Nenhuma cidade encontrado na tabela.")
     
+    #Seleção das cidades para edição
+    dados_cidades = Cidade.obter_cidades()
+
+    minhas_cidades = list(zip(dados_cidades["nome_cid"], dados_cidades["codigo_cid"]))
+    cidade_selecionada_edicao = st.selectbox(
+        "Selecione a cidade para editar",
+        minhas_cidades,
+        format_func=lambda x: f"{x[0]} - {x[1]}"
+    )
+
+    if cidade_selecionada_edicao:
+        nome_cid = cidade_selecionada_edicao[0]
+        codigo_cidade = cidade_selecionada_edicao[1]
+
+        with st.form(key="edit_cidade"):
+            st.title(f"Editar cidade {nome_cid}")
+            st.write("Preencher Tabela Cidade")
+            input_nome_cid = st.text_input(label="Insira o nome da cidade")
+            input_preco_unit_valor = st.number_input(label="Insira o preco por unidade", step=0.5, format="%.2f")
+            input_preco_unit_peso = st.number_input(label="Insira o preco por peso", step=0.5, format="%.2f")
+            opcoes_estados = dados_estados["uf"].tolist()
+            input_uf = st.selectbox(
+            "Selecione a unidade federativa", 
+            opcoes_estados
+            )
+            
+            input_cidade_button_submit = st.form_submit_button(label=f"Editar cidade {nome_cid}")
+
+            if input_cidade_button_submit:
+                cidade = Cidade(
+                    codigo_cid=codigo_cidade,
+                    nome_cid=input_nome_cid,
+                    preco_unit_valor=input_preco_unit_valor,
+                    preco_unit_peso = input_preco_unit_peso,
+                    uf=input_uf
+                )
+                cidade.editar_cidade()
+
+                st.success(f"Cidade {nome_cid} editada com sucesso!", icon="✅")
+
 with tab4:
     st.title("CRUD FUNCIONÁRIO")
     ## FAZER A PARTE DO FUNCIONÁRIO AQUI
