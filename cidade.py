@@ -70,3 +70,31 @@ class Cidade:
         except Exception as e:
             connection.rollback()  # Reverte a transação para limpar o erro
             print(f"Erro ao editar a cidade: {e}") 
+
+    @staticmethod
+    def excluir_cidade(codigo_cid):  
+        try:
+            cursor = connection.cursor()
+            # Primeiro, excluir os registros dependentes das tabelas relacionadas
+            
+            # Excluir da tabela 'Frete' onde o 'Origem_Cid' ou 'Destino_Cid' seja o codigo_cidade
+            cursor.execute(
+                """
+                DELETE FROM Frete WHERE Origem_CID = %s OR Destino_CID = %s;
+                """, (codigo_cid, codigo_cid)
+            )
+            
+            cursor.execute(
+                """
+                DELETE FROM Cidade WHERE codigo_cid = %s;
+                """, (codigo_cid,)
+            )
+            
+            connection.commit()
+            cursor.close()
+            
+            print(f"Cidade {codigo_cid} excluída com sucesso no banco de dados.")  # Debugar essa kralha
+        except Exception as e:
+            connection.rollback()
+            
+            print(f"Erro ao excluir a cidade {codigo_cid}: {e}")  # tbm p debugar porra

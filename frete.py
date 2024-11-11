@@ -50,3 +50,4 @@ class Frete:
         except Exception as e:
             print(f"Erro ao obter fretes: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
+        

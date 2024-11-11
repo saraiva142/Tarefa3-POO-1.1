@@ -247,7 +247,7 @@ with tab2:
         )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
     
     # Botão para excluir estado 
-    if st.button("Excluir Estado"):
+    if st.button(f"Excluir Estado {estado_selecionado[0]}"):
         if estado_selecionado:
             Estado.excluir_estado(estado_selecionado[0])  # Chama a função para excluir o estado
             #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
@@ -344,6 +344,28 @@ with tab3:
                 cidade.editar_cidade()
 
                 st.success(f"Cidade {nome_cid} editada com sucesso!", icon="✅")
+    
+    # Seleção do cliente para exclusão
+    dados_cidades = Cidade.obter_cidades()
+    
+    meus_cidades = list(zip(dados_cidades["uf"], dados_cidades["nome_cid"], dados_cidades["codigo_cid"]))
+    cidade_selecionado = st.selectbox(
+        "Selecione a cidade para excluir", 
+        meus_cidades,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - {x[1]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+    
+    cidade = cidade_selecionado
+    
+    # Botão para excluir estado 
+    if st.button(f"Excluir {cidade[1]}"):
+        if cidade_selecionado:
+            Cidade.excluir_cidade(cidade_selecionado[2])  # Chama a função para excluir a cidade
+            #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
+            st.success(f"Cidade {cidade_selecionado[2]} - {cidade_selecionado[1]} excluído com sucesso!", icon="🤐")
+        else:
+            st.warning("Selecione uma cidade para excluir")
+        
 
 with tab4:
     st.title("CRUD FUNCIONÁRIO")
@@ -510,6 +532,7 @@ with tab5:
             #ClienteController.Incluir(cliente)
             st.success('Frete Cadastrado com sucesso!', icon="✅")
         st.subheader("Visualizar Fretes Cadastrados")
+        
     if st.button("Visualizar Dados Fretes"):
         dados_fretes = Frete.obter_fretes()
         if not dados_fretes.empty:
