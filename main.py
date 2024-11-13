@@ -120,10 +120,10 @@ with tab1:
     if cliente_selecionado_edicao:
         cod_cliente = cliente_selecionado_edicao[0]
         cliente_data_insc = cliente_selecionado_edicao[2]
-        cliente_tipo = cliente_selecionado_edicao[1]
+        cliente_tipo_atual = cliente_selecionado_edicao[1]
         
         with st.form(key="edit_cliente"):
-            st.title(f"Editar Cliente {cliente_selecionado_edicao[0]}")
+            st.title(f"Editar Cliente {cod_cliente}")
             st.write("Preencher Tabela Cliente")
             #input_cod_cliente =st.number_input(label="Insira o código do cliente", format="%d", step=1, value=cliente_selecionado_edicao[0]) 
             input_data_insc = st.date_input(label="Insira a data de INSC")
@@ -144,7 +144,7 @@ with tab1:
                 cliente.editar_cliente()
                 #ClienteController.Incluir(cliente)
                 st.success(f'Cliente {cod_cliente} Editado com sucesso!', icon="✅")
-                #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho
+                #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho"""
             
     st.title("Excluir Cliente")
     # Seleção do cliente para exclusão
@@ -531,12 +531,30 @@ with tab5:
             frete.inserir_frete()
             #ClienteController.Incluir(cliente)
             st.success('Frete Cadastrado com sucesso!', icon="✅")
-        st.subheader("Visualizar Fretes Cadastrados")
-        
+    
+    st.subheader("Visualizar Fretes Cadastrados")    
     if st.button("Visualizar Dados Fretes"):
         dados_fretes = Frete.obter_fretes()
         if not dados_fretes.empty:
             st.dataframe(dados_fretes)
         else:
             st.write("Nenhum frete encontrado na tabela.")
+
+    dados_fretes = Frete.obter_fretes()
+
+    meus_fretes = list(zip(dados_fretes["num_conhec"], dados_fretes["remetente_cli"], dados_fretes["destinatario_cli"], dados_fretes["quem_paga"]))
+    frete_selecionado = st.selectbox(
+        "Selecione o frete para excluir",
+        meus_fretes, 
+        format_func=lambda x: f"{x[0]} - {x[1]} - {x[2]} - {x[3]}"
+    )
+
+    if st.button(f"Excluir Frete {input_numero_conhecimento}"):
+        if frete_selecionado:
+            Frete.excluir_fretes(frete_selecionado[0])  # Chama a função para excluir o estado
+            #st.experimental_rerun()  # Atualiza a página para refletir a exclusão
+            st.success(f"Frete {input_numero_conhecimento} excluído com sucesso!", icon="🤐")
+        else:
+            st.warning("Selecione um frete para excluir")
+        
     ## FAZER A PARTE DO FUNCIONÁRIO AQUI

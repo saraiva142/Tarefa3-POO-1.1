@@ -80,6 +80,7 @@ class Cliente:
             print(f"Erro ao obter clientes: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
     
+    
     @staticmethod
     def obter_pessoas_fisicas():
         try:
@@ -111,6 +112,22 @@ class Cliente:
         except Exception as e:
             print(f"Erro ao obter dados de pessoas jurídicas: {e}")
             return pd.DataFrame()
+    
+    @staticmethod
+    def obter_dados_especificos(cod_cliente, tipo_cliente):
+        try:
+            cursor = connection.cursor()
+            if tipo_cliente == "Pessoa Fisica":
+                cursor.execute("SELECT Nome, CPF FROM PessoaFisica WHERE cod_cliente = %s", (cod_cliente,))
+            else:  # Caso seja Pessoa Jurídica
+                cursor.execute("SELECT Razao_Social, Inscricao_Estadual, CNPJ FROM PessoaJuridica WHERE cod_cliente = %s", (cod_cliente,))
+
+            dados = cursor.fetchone()
+            cursor.close()
+            return dados
+        except Exception as e:
+            print(f"Erro ao obter dados específicos do cliente {cod_cliente}: {e}")
+            return None
 
     def editar_cliente(self):
         try:
@@ -175,3 +192,17 @@ class Cliente:
             connection.rollback()
             st.error(f"Erro ao excluir o cliente: {e}")
             print(f"Erro ao excluir o cliente {cod_cliente}: {e}")  # tbm p debugar porra
+    
+    @staticmethod
+    def excluir_dados_fisica(cod_cliente):
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM Pessoa_Fisica WHERE cod_cliente = %s", (cod_cliente,))
+        connection.commit()
+        cursor.close()
+
+    @staticmethod
+    def excluir_dados_juridica(cod_cliente):
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM Pessoa_Juridica WHERE cod_cliente = %s", (cod_cliente,))
+        connection.commit()
+        cursor.close()

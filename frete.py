@@ -50,4 +50,23 @@ class Frete:
         except Exception as e:
             print(f"Erro ao obter fretes: {e}")
             return pd.DataFrame()  # Retorna DataFrame vazio em caso de erro
-        
+
+    @staticmethod
+    def excluir_fretes(num_conhec):
+        try:
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                DELETE FROM Frete WHERE Num_Conhec = %s;
+                """, (num_conhec,)
+            )
+
+            connection.commit()
+            cursor.close()
+
+            print(f"Frete {num_conhec} excluído com sucesso no banco de dados.")
+        except Exception as e:
+            connection.rollback()
+
+            print(f"Erro ao excluir o frete {num_conhec}: {e}")
