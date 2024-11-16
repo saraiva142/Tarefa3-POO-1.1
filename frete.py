@@ -70,3 +70,27 @@ class Frete:
             connection.rollback()
 
             print(f"Erro ao excluir o frete {num_conhec}: {e}")
+
+
+    def editar_frete(self):
+        try:
+            cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
+          
+            cursor.execute("""
+                  UPDATE Frete
+                  SET Peso = %s, Valor = %s, Pedagio = %s, ICMS = %s, Data_Frete = %s, Quem_Paga = %s, Peso_Ou_Valor = %s, Origem_CID = %s, Destino_CID = %s, Remetente_Cli = %s, Destinatario_Cli = %s
+                  WHERE Num_Conhec = %s;
+                """,
+               (self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.num_conhec)
+            )
+             # Verificar se o comando afetou alguma linha
+            #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
+            if cursor.rowcount == 0: #Isso tbm é mais para debugar (como sempre)
+                print("Nenhuma linha foi atualizada - verifique se o Num Conhecimento existe.")
+
+            connection.commit()
+            cursor.close() ## Encerra a conexão
+            print("Frete editado com sucesso!")
+        except Exception as e:
+            connection.rollback()  # Reverte a transação para limpar o erro
+            print(f"Erro ao editar o frete: {e}")     

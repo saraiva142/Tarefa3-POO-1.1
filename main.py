@@ -540,6 +540,134 @@ with tab5:
         else:
             st.write("Nenhum frete encontrado na tabela.")
 
+
+    # Seleção do cliente para edição
+    dados_fretes = Frete.obter_fretes()
+    
+    meus_fretes = list(zip(
+        dados_fretes["num_conhec"],
+        dados_fretes["peso"],
+        dados_fretes["valor"],
+        dados_fretes["pedagio"],
+        dados_fretes["icms"],
+        dados_fretes["data_frete"],
+        dados_fretes["quem_paga"],
+        dados_fretes["peso_ou_valor"],
+        dados_fretes["origem_cid"],
+        dados_fretes["destino_cid"],
+        dados_fretes["remetente_cli"],
+        dados_fretes["destinatario_cli"],
+    ))
+    frete_selecionado_edicao = st.selectbox(
+        "Selecione o frete para editar", 
+        meus_fretes,  # Passa a lista de tuplas
+        format_func=lambda x: f"{x[0]} - Valor R$ {x[1]}" 
+        )  # Exemplo para pegar a primeira coluna, ajuste conforme necessário
+
+    if frete_selecionado_edicao:
+        num_conhec = frete_selecionado_edicao[0]
+        peso = frete_selecionado_edicao[1]
+        valor = frete_selecionado_edicao[2]
+        pedagio =frete_selecionado_edicao[3]
+        icms =frete_selecionado_edicao[4]
+        data_frete =frete_selecionado_edicao[5]
+        quem_paga =frete_selecionado_edicao[6]
+        peso_ou_valor =frete_selecionado_edicao[7]
+        origem_cid =frete_selecionado_edicao[8]
+        destino_cid =frete_selecionado_edicao[9]
+        remetente_cli =frete_selecionado_edicao[10]
+        destinatario_cli =frete_selecionado_edicao[11]
+        
+        with st.form(key="edit_frete"):
+            st.title(f"Editar Frete {num_conhec}")
+            st.write("Preencher Tabela Frete")
+           
+            #input_numero_conhecimento = st.number_input(label="Insira o Numero de conhecimento do frete", format="%s")
+            input_peso_frete = st.number_input(label="Insira o peso do Frete")
+            input_valor = st.number_input(label="Insira o valor do Frete")
+            input_pedagio = st.text_input(label="Insira o valor do Pedagio do Frete")
+            input_icms_frete = st.number_input(label="Insira o icms do Frete")
+            input_data_frete = st.date_input(label="Insira a data do Frete")
+            input_nome_quem_vai_pagar = st.text_input(label="Insira o nome de quem vai pagar o Frete")
+            
+            # input_peso_ou_valor = st.text_input(label="Insira se vai ser peso ou valor o Frete")
+
+            input_peso_ou_valor = st.radio(
+            "Escolha o metodo de calculo do frete :point_down:",
+            ["peso", "valor"],
+            key="peso_valor",
+            )
+    
+            # input_cidade_origem = st.text_input(label="Insira a cidade de origem do Frete")
+            dados_cidades = Cidade.obter_cidades()
+
+            # opcoes_cidades = [(cidade.codigo_cid, cidade.nome_cid) for cidade in dados_cidades]
+
+            opcoes_cidades = list(zip(dados_cidades["codigo_cid"], dados_cidades["nome_cid"]))
+            
+            codigo_cidade_origem = st.selectbox(
+            "Selecione a cidade de origem", 
+            opcoes_cidades, 
+            format_func=lambda x: x[1]
+            )
+            # Armazenando o código da cidade de origem
+            cidade_origem_selecionada = codigo_cidade_origem[0]
+            #Debugar: print(f'Cidade: {cidade_origem_selecionada}')
+
+            # cidade_origem_selecionada = st.text_input(label="Insira a cidade de origem do Frete")
+            #input_cidade_destino = st.text_input(label="Insira a cidade de destino do Frete")
+
+            codigo_cidade_destino = st.selectbox(
+            "Selecione a cidade de destino", 
+            opcoes_cidades, 
+            format_func=lambda x: x[1]
+            )
+            # Armazenando o código da cidade de origem
+            input_cidade_destino = codigo_cidade_destino[0]
+            # Debugar: print(f'Cidade: {input_cidade_destino}')
+            
+            
+            #input_remetente_frete = st.text_input(label="Insira o remetente do Frete")
+            
+            dados_clientes = Cliente.obter_clientes()
+
+            opcoes_clientes = dados_clientes["cod_cli"].tolist()
+            
+            input_remetente_frete = st.selectbox(
+            "Selecione o código do remetente", 
+                opcoes_clientes
+            )
+            #input_destinatario = st.text_input(label="Insira o destinatario do Frete")
+            input_destinatario = st.selectbox(
+                "Selecione o código do destinatário",
+                opcoes_clientes
+            )
+            
+            input_cliente_button_submit = st.form_submit_button(label=f"Editar Frete {frete_selecionado_edicao[0]}")
+                
+            if input_cliente_button_submit:  #(Se o input_botton_submit for True = Apertado)
+                frete = Frete(
+                        num_conhec=input_numero_conhecimento,
+                        peso=input_peso_frete,
+                        valor=input_valor,
+                        pedagio=input_pedagio,
+                        icms=input_icms_frete,
+                        data_frete=input_data_frete,
+                        quem_paga=input_nome_quem_vai_pagar,
+                        peso_ou_valor=input_peso_ou_valor,
+                        origem_cid=cidade_origem_selecionada,
+                        destino_cid=input_cidade_destino,
+                        remetente_cli=input_remetente_frete,
+                        destinatario_cli=input_destinatario
+                        )
+                frete.editar_frete()
+                #ClienteController.Incluir(cliente)
+                st.success(f'Frete {num_conhec} Editado com sucesso!', icon="✅")
+                #print(type, input_data_insc) debugar isso pq tava dando erro dum caralho"""
+                print("Origem CID:", cidade_origem_selecionada)
+                print("Destino CID:", input_cidade_destino)
+
+
     dados_fretes = Frete.obter_fretes()
 
     meus_fretes = list(zip(dados_fretes["num_conhec"], dados_fretes["remetente_cli"], dados_fretes["destinatario_cli"], dados_fretes["quem_paga"]))
