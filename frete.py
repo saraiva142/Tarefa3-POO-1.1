@@ -94,3 +94,33 @@ class Frete:
         except Exception as e:
             connection.rollback()  # Reverte a transação para limpar o erro
             print(f"Erro ao editar o frete: {e}")     
+
+    #Fase 3
+    @staticmethod
+    def obter_arrecadacao_por_cidade_estado(uf, cidade):
+        try:
+            cursor = connection.cursor()  # Ligando a conexão
+            
+            cursor.execute("""
+                SELECT 
+                    c.nome_cid AS cidade_destino, 
+                    c.uf AS uf_destino, 
+                    COUNT(f.Num_Conhec) AS quantidade_fretes, 
+                    SUM(f.Valor) AS total_arrecadado
+                FROM Frete f
+                JOIN Cidade c ON f.Destino_CID = c.Codigo_CID
+                WHERE c.uf = %s AND c.nome_cid = %s AND EXTRACT(YEAR FROM f.Data_Frete) = 2024
+                GROUP BY c.nome_cid, c.uf;
+            """, (uf, cidade))
+            
+            resultado = cursor.fetchall()  # Obtendo os resultados da consulta
+            
+            cursor.close()  # Encerrando o cursor
+            return resultado
+        
+        except Exception as e:
+            connection.rollback()  # Revertendo em caso de erro
+            print(f"Erro ao obter arrecadação: {e}")
+            return []
+
+        

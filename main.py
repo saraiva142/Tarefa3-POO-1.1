@@ -20,7 +20,7 @@ url = "https://github.com/saraiva142/Tarefa3-POO-1.1"
 
 st.markdown("[Código fonte GitHub](%s)" % url)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete", "B.I de Fretes"])
 
 with tab1:
     with st.form(key="include_cliente"):
@@ -684,5 +684,42 @@ with tab5:
             st.success(f"Frete {input_numero_conhecimento} excluído com sucesso!", icon="🤐")
         else:
             st.warning("Selecione um frete para excluir")
+
+with tab6:
+    st.title("Arrecadações de Fretes")
+
+    with st.form(key="include_arrecadaFrete"):
+        st.write("Arrecadação de Frete por Estado/Cidade")
+
+        # Dados de Estados e Cidades
+        dados_cidades = Cidade.obter_cidades()
         
-    ## FAZER A PARTE DO FUNCIONÁRIO AQUI
+        #st.write(dados_cidades) #Ja começa debugando o fdp
+        
+        
+        # Ajuste baseado no formato
+        minhas_cidades = list(zip(dados_cidades["uf"], dados_cidades["nome_cid"]))  
+        
+        # Selecionar Estado e Cidade
+        cidade_estado_selecionado = st.selectbox(
+            "Selecione o Estado/Cidade",
+            minhas_cidades,
+            format_func=lambda x: f"{x[0]} - {x[1]}"
+        )
+
+        submit_button = st.form_submit_button(f"Arrecadações de {cidade_estado_selecionado[0]} - {cidade_estado_selecionado[1]}")
+        
+        if submit_button:
+            estado, cidade = cidade_estado_selecionado
+            arrecadacao = Frete.obter_arrecadacao_por_cidade_estado(estado, cidade)
+            
+            if arrecadacao:
+                st.markdown("***Resultados:***")
+                for item in arrecadacao:
+                    st.markdown(f"***Cidade***:  {item[0]}")
+                    st.markdown(f"***Estado***: {item[1]}")
+                    st.markdown(f"***Quantidade de Fretes***: {item[2]}")
+                    st.markdown(f"***Valor Total Arrecadado***: R${item[3]:,.2f}")
+
+            else:
+                st.warning("Nenhum resultado encontrado para a consulta.")
