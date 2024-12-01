@@ -716,10 +716,13 @@ with tab6:
             if arrecadacao:
                 st.markdown("***Resultados:***")
                 for item in arrecadacao:
-                    st.markdown(f"***Cidade***:  {item[0]}")
-                    st.markdown(f"***Estado***: {item[1]}")
-                    st.markdown(f"***Quantidade de Fretes***: {item[2]}")
-                    st.markdown(f"***Valor Total Arrecadado***: R${item[3]:,.2f}")
+                    st.markdown(f"### {item['cidade_destino']} - {item['uf_destino']}")
+                    st.markdown(f"- **Quantidade de Fretes**: {item['quantidade_fretes']}")
+                    st.markdown(f"- **Valor Total Arrecadado**: R${item['total_arrecadado']:,.2f}")
+                    #Back p debugar X(
+                    print(f" {item['cidade_destino']} - {item['uf_destino']}")
+                    print(f"- Quantidade de Fretes**: {item['quantidade_fretes']}")
+                    print(f"- Valor Total Arrecadado**: R${item['total_arrecadado']:,.2f}")
 
             else:
                 st.warning("Nenhum resultado encontrado para a consulta.")

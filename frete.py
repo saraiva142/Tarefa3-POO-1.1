@@ -116,7 +116,21 @@ class Frete:
             resultado = cursor.fetchall()  # Obtendo os resultados da consulta
             
             cursor.close()  # Encerrando o cursor
-            return resultado
+            
+        
+            # Processar os resultados para retornar como lista de dicionários
+            #Ou seja, conceito de Collections
+            dados_processados = []
+            for row in resultado:
+                dados_processados.append({
+                    "cidade_destino": row[0],
+                    "uf_destino": row[1],
+                    "quantidade_fretes": row[2],
+                    "total_arrecadado": row[3]
+                })
+
+            return dados_processados  # Retorna como uma lista de dicionários => COLLECTIONS
+
         
         except Exception as e:
             connection.rollback()  # Revertendo em caso de erro
