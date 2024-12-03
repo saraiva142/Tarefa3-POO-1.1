@@ -76,6 +76,13 @@ class Funcionario:
             cursor = connection.cursor()
             # Primeiro, excluir os registros dependentes das tabelas relacionadas - Não tem
     
+            # Excluir da tabela 'Frete'
+            cursor.execute(
+                """
+                DELETE FROM Frete WHERE Funcionario = %s;
+                """, (num_reg,)
+            )
+            
             # Excluir da tabela 'Funcionario'
             cursor.execute(
                 """

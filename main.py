@@ -20,7 +20,7 @@ url = "https://github.com/saraiva142/Tarefa3-POO-1.1"
 
 st.markdown("[Código fonte GitHub](%s)" % url)
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete", "B.I de Fretes"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete", "B.I de Fretes", "Funcionário - PJ", "Média de Fretes"])
 
 with tab1:
     with st.form(key="include_cliente"):
@@ -459,6 +459,17 @@ with tab5:
         input_data_frete = st.date_input(label="Insira a data do Frete")
         input_nome_quem_vai_pagar = st.text_input(label="Insira o nome de quem vai pagar o Frete")
         
+        dados_funcionarios = Funcionario.obter_funcionarios()
+        
+        opcoes_funcionarios = list(zip(dados_funcionarios["num_reg"], dados_funcionarios["nome_func"]))
+        
+        funcionario_escolhido = st.selectbox(
+            "Selecione o funcionário que está em atendimento",
+            opcoes_funcionarios, 
+            format_func=lambda x: f"{x[0]} - {x[1]}"
+        )
+        input_funcionario = funcionario_escolhido[0] # Vamos pegar o código do funcionário pois coloquei na tabela como INT a coluna funcionario
+        
         # input_peso_ou_valor = st.text_input(label="Insira se vai ser peso ou valor o Frete")
 
         input_peso_ou_valor = st.radio(
@@ -522,6 +533,7 @@ with tab5:
                 icms=input_icms_frete,
                 data_frete=input_data_frete,
                 quem_paga=input_nome_quem_vai_pagar,
+                funcionario=input_funcionario,
                 peso_ou_valor=input_peso_ou_valor,
                 origem_cid=cidade_origem_selecionada,
                 destino_cid=input_cidade_destino,
@@ -552,6 +564,7 @@ with tab5:
         dados_fretes["icms"],
         dados_fretes["data_frete"],
         dados_fretes["quem_paga"],
+        dados_fretes["funcionario"],
         dados_fretes["peso_ou_valor"],
         dados_fretes["origem_cid"],
         dados_fretes["destino_cid"],
@@ -572,11 +585,12 @@ with tab5:
         icms =frete_selecionado_edicao[4]
         data_frete =frete_selecionado_edicao[5]
         quem_paga =frete_selecionado_edicao[6]
-        peso_ou_valor =frete_selecionado_edicao[7]
-        origem_cid =frete_selecionado_edicao[8]
-        destino_cid =frete_selecionado_edicao[9]
-        remetente_cli =frete_selecionado_edicao[10]
-        destinatario_cli =frete_selecionado_edicao[11]
+        funcionario =frete_selecionado_edicao[7]
+        peso_ou_valor =frete_selecionado_edicao[8]
+        origem_cid =frete_selecionado_edicao[9]
+        destino_cid =frete_selecionado_edicao[10]
+        remetente_cli =frete_selecionado_edicao[11]
+        destinatario_cli =frete_selecionado_edicao[12]
         
         with st.form(key="edit_frete"):
             st.title(f"Editar Frete {num_conhec}")
@@ -589,6 +603,18 @@ with tab5:
             input_icms_frete = st.number_input(label="Insira o icms do Frete")
             input_data_frete = st.date_input(label="Insira a data do Frete")
             input_nome_quem_vai_pagar = st.text_input(label="Insira o nome de quem vai pagar o Frete")
+            
+            dados_funcionarios = Funcionario.obter_funcionarios()
+        
+            opcoes_funcionarios = list(zip(dados_funcionarios["num_reg"], dados_funcionarios["nome_func"]))
+            
+            funcionario_escolhido = st.selectbox(
+                "Selecione o funcionário que está em atendimento",
+                opcoes_funcionarios, 
+                format_func=lambda x: f"{x[0]} - {x[1]}"
+            )
+            input_funcionario = funcionario_escolhido[0] # Vamos pegar o código do funcionário pois coloquei na tabela como INT a coluna funcionario
+            
             
             # input_peso_ou_valor = st.text_input(label="Insira se vai ser peso ou valor o Frete")
 
@@ -654,6 +680,7 @@ with tab5:
                         icms=input_icms_frete,
                         data_frete=input_data_frete,
                         quem_paga=input_nome_quem_vai_pagar,
+                        funcionario=input_funcionario,
                         peso_ou_valor=input_peso_ou_valor,
                         origem_cid=cidade_origem_selecionada,
                         destino_cid=input_cidade_destino,
@@ -721,8 +748,70 @@ with tab6:
                     st.markdown(f"- **Valor Total Arrecadado**: R${item['total_arrecadado']:,.2f}")
                     #Back p debugar X(
                     print(f" {item['cidade_destino']} - {item['uf_destino']}")
-                    print(f"- Quantidade de Fretes**: {item['quantidade_fretes']}")
-                    print(f"- Valor Total Arrecadado**: R${item['total_arrecadado']:,.2f}")
+                    print(f"- Quantidade de Fretes: {item['quantidade_fretes']}")
+                    print(f"- Valor Total Arrecadado: R${item['total_arrecadado']:,.2f}")
 
             else:
                 st.warning("Nenhum resultado encontrado para a consulta.")
+
+with tab7:
+    st.title("PJ´s Atendidos por Funcionários")
+
+    with st.form(key="include_FuncionarioPJ"):
+        st.write("Consulta de Fretes Realizados por Funcionários para Pessoas Jurídicas")
+
+        # Entrada para Mês e Ano
+        mes_ano = st.text_input("Informe o mês/ano (formato MM/AAAA):", placeholder="Ex: 01/2024")
+        
+        submit_button = st.form_submit_button("Consultar Fretes")
+        
+        if submit_button:
+            # Verifica se a entrada é válida
+            if "/" in mes_ano:
+                try:
+                    mes, ano = map(int, mes_ano.split('/'))  # Converte para inteiros
+                    
+                    # Busca os fretes pelo método na classe Frete
+                    fretes = Frete.obter_fretes_funcionarios_pj(mes_ano)
+                    
+                    if fretes:
+                        st.markdown("### Resultados:")
+                        for frete in fretes:
+                            st.markdown(f"**Número do Conhecimento:** {frete['num_conhecimento']}")
+                            st.markdown(f"- **Data do Frete:** {frete['data_frete']}")
+                            st.markdown(f"- **Representante Empresa (PJ):** {frete['representante_empresa']}")
+                            st.markdown(f"- **Funcionário Responsável:** {frete['funcionario_responsavel']}")
+                            st.markdown("---")
+                    
+                    else:
+                        st.warning("Nenhum frete encontrado para o mês/ano informado.")
+
+                except ValueError:
+                    st.error("Erro ao processar o mês/ano. Certifique-se de usar o formato MM/AAAA e valores válidos.")
+            else:
+                st.error("Por favor, informe o mês/ano no formato MM/AAAA.")
+
+with tab8:
+    st.title("Média de Fretes")
+
+    with st.form(key=""):
+        st.write("Média de fretes de cada cidade")
+
+        #Obter dados das cidades e estados
+
+        dados_cidades = Cidade.obter_cidades()
+        dados_estados = Estado.obter_estados()  
+        dados_fretes = Frete.obter_fretes()
+
+        minhas_cidades = list(zip(dados_cidades["nome_cid"]))
+        meus_fretes = list(zip(dados_fretes["origem_cid"], dados_fretes["destino_cid"], dados_fretes["num_conhec"]))
+        meus_estados = list(zip(dados_estados["uf"], dados_estados["nome_est"]))  
+
+        frete_estado_selecionado = st.selectbox(
+            "Selecione o Estado",
+            meus_estados,
+            format_func=lambda x: f"{x[0]} - {x[1]}"
+        )
+    
+    if estado_selecionado:
+        uf = estado_selecionado

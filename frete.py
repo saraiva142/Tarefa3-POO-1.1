@@ -3,7 +3,7 @@ import pandas as pd
 
 
 class Frete:
-    def __init__(self, num_conhec, peso, valor, pedagio, icms, data_frete, quem_paga, peso_ou_valor, origem_cid, destino_cid, remetente_cli, destinatario_cli):
+    def __init__(self, num_conhec, peso, valor, pedagio, icms, data_frete, quem_paga, peso_ou_valor, origem_cid, destino_cid, remetente_cli, destinatario_cli, funcionario):
         self.num_conhec = num_conhec
         self.peso = peso
         self.valor = valor
@@ -16,16 +16,17 @@ class Frete:
         self.destino_cid = destino_cid
         self.remetente_cli = remetente_cli
         self.destinatario_cli = destinatario_cli
+        self.funcionario = funcionario
 
     def inserir_frete(self):
         try:
             cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
             cursor.execute(
                 """
-                INSERT INTO frete (Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                INSERT INTO frete (Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli, Funcionario)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                 """,
-                (self.num_conhec, self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli)
+                (self.num_conhec, self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.funcionario)
             )
             connection.commit()
             cursor.close() ## Encerra a conexão
@@ -38,7 +39,7 @@ class Frete:
     def obter_fretes():
         try:
             cursor = connection.cursor()
-            cursor.execute("SELECT Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli FROM Frete;")
+            cursor.execute("SELECT Num_Conhec, Peso, Valor, Pedagio, ICMS, Data_Frete, Quem_Paga, Peso_Ou_Valor, Origem_CID, Destino_CID, Remetente_Cli, Destinatario_Cli, Funcionario FROM Frete;")
             rows = cursor.fetchall()
             colnames = [desc[0] for desc in cursor.description]  # Nome das colunas
             cursor.close()
@@ -78,10 +79,10 @@ class Frete:
           
             cursor.execute("""
                   UPDATE Frete
-                  SET Peso = %s, Valor = %s, Pedagio = %s, ICMS = %s, Data_Frete = %s, Quem_Paga = %s, Peso_Ou_Valor = %s, Origem_CID = %s, Destino_CID = %s, Remetente_Cli = %s, Destinatario_Cli = %s
+                  SET Peso = %s, Valor = %s, Pedagio = %s, ICMS = %s, Data_Frete = %s, Quem_Paga = %s, Peso_Ou_Valor = %s, Origem_CID = %s, Destino_CID = %s, Remetente_Cli = %s, Destinatario_Cli = %s, Funcionario = %s
                   WHERE Num_Conhec = %s;
                 """,
-               (self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.num_conhec)
+               (self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.funcionario, self.num_conhec)
             )
              # Verificar se o comando afetou alguma linha
             #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
@@ -137,4 +138,55 @@ class Frete:
             print(f"Erro ao obter arrecadação: {e}")
             return []
 
-        
+    @staticmethod
+    @staticmethod
+    def obter_fretes_funcionarios_pj(mes_ano):
+        try:
+            # Dividir o mês e o ano fornecidos
+            mes, ano = map(int, mes_ano.split('/'))
+            
+            print(f"Buscando fretes para: {mes}/{ano}")  #Apenas para debugar
+
+            cursor = connection.cursor()
+            
+            cursor.execute("""
+                SELECT 
+                    f.Num_Conhec AS num_conhecimento,
+                    f.Data_Frete AS data_frete,
+                    pj.Razao_Social AS representante_empresa, -- Razão social da pessoa jurídica
+                    func.Nome_Func AS funcionario_responsavel
+                FROM Frete f
+                JOIN Cliente c ON f.Destinatario_Cli = c.Cod_Cli
+                JOIN Pessoa_Juridica pj ON c.Cod_Cli = pj.Cod_Cli
+                JOIN Funcionario func ON f.Funcionario = func.Num_Reg
+                WHERE c.Tipo_Cliente = 'Pessoa Juridica' -- Apenas PJ
+                AND EXTRACT(MONTH FROM f.Data_Frete) = %s
+                AND EXTRACT(YEAR FROM f.Data_Frete) = %s;
+            """, (mes, ano))
+            
+            resultado = cursor.fetchall()
+            cursor.close()
+            
+            print(f"Resultado da consulta: {resultado}")  #Socorro ta bugado
+            
+             # Depurando o filha da puta q n funciona
+            if not resultado:
+                print(f"Nenhum frete encontrado para {mes}/{ano}")
+                
+            # Processar resultados em formato de lista de dicionários
+            fretes_processados = [
+                {
+                    "num_conhecimento": row[0],
+                    "data_frete": row[1],
+                    "representante_empresa": row[2],
+                    "funcionario_responsavel": row[3],
+                }
+                for row in resultado
+            ]
+            
+            return fretes_processados
+
+        except Exception as e:
+            connection.rollback()
+            print(f"Erro ao buscar fretes: {e}")
+            return []
