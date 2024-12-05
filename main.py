@@ -4,6 +4,8 @@ from estado import Estado
 from cidade import Cidade
 from funcionario import Funcionario
 from frete import Frete
+from ligar_connect import connection
+import pandas as pd
 
 # Configurando o tema padrão
 st.set_page_config(
@@ -20,7 +22,7 @@ url = "https://github.com/saraiva142/Tarefa3-POO-1.1"
 
 st.markdown("[Código fonte GitHub](%s)" % url)
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete", "B.I de Fretes", "Funcionário - PJ", "Média de Fretes"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(["Cliente", "Estado", "Cidade", "Funcionário", "Frete", "B.I de Fretes", "Média de Fretes", "Funcionário - PJ"])
 
 with tab1:
     with st.form(key="include_cliente"):
@@ -753,8 +755,45 @@ with tab6:
 
             else:
                 st.warning("Nenhum resultado encontrado para a consulta.")
-
+                
 with tab7:
+    st.title("Média de Fretes por Estado")
+
+    # Interface do usuário para selecionar o estado
+    with st.form(key="form_frete"):
+        st.write("Selecione o estado para visualizar as médias de fretes")
+
+        # Obter os estados disponíveis no banco de dados
+        try:
+            cursor = connection.cursor()
+            cursor.execute("SELECT DISTINCT UF FROM Cidade;")
+            estados_disponiveis = [row[0] for row in cursor.fetchall()]
+            cursor.close()
+        except Exception as e:
+            st.error(f"Erro ao obter os estados: {e}")
+            estados_disponiveis = []
+
+        # Dropdown para selecionar o estado
+        estado_selecionado = st.selectbox("Selecione o Estado", estados_disponiveis)
+
+        # Botão para submeter o formulário
+        submit_button = st.form_submit_button("Calcular")
+
+        if submit_button and estado_selecionado:
+            # Chama o método da classe Frete para obter as médias
+            media_fretes = Frete.obter_media_fretes_por_cidade_estado(estado_selecionado)
+
+            if media_fretes:
+                st.markdown("### Resultados:")
+                for frete in media_fretes:
+                    st.markdown(f"**Cidade:** {frete['cidade']}")
+                    st.markdown(f"- **Média de Fretes de Origem:** {frete['media_fretes_origem']:.2f}")
+                    st.markdown(f"- **Média de Fretes de Destino:** {frete['media_fretes_destino']:.2f}")
+                    st.markdown("---")
+            else:
+                st.warning("Nenhum dado encontrado para o estado selecionado.")
+
+with tab8:
     st.title("PJ´s Atendidos por Funcionários")
 
     with st.form(key="include_FuncionarioPJ"):
@@ -790,28 +829,3 @@ with tab7:
                     st.error("Erro ao processar o mês/ano. Certifique-se de usar o formato MM/AAAA e valores válidos.")
             else:
                 st.error("Por favor, informe o mês/ano no formato MM/AAAA.")
-
-with tab8:
-    st.title("Média de Fretes")
-
-    with st.form(key=""):
-        st.write("Média de fretes de cada cidade")
-
-        #Obter dados das cidades e estados
-
-        dados_cidades = Cidade.obter_cidades()
-        dados_estados = Estado.obter_estados()  
-        dados_fretes = Frete.obter_fretes()
-
-        minhas_cidades = list(zip(dados_cidades["nome_cid"]))
-        meus_fretes = list(zip(dados_fretes["origem_cid"], dados_fretes["destino_cid"], dados_fretes["num_conhec"]))
-        meus_estados = list(zip(dados_estados["uf"], dados_estados["nome_est"]))  
-
-        frete_estado_selecionado = st.selectbox(
-            "Selecione o Estado",
-            meus_estados,
-            format_func=lambda x: f"{x[0]} - {x[1]}"
-        )
-    
-    if estado_selecionado:
-        uf = estado_selecionado

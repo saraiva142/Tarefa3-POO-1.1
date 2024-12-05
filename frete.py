@@ -76,15 +76,15 @@ class Frete:
     def editar_frete(self):
         try:
             cursor = connection.cursor() ## Ligar a conexão para fazer a inserção dos dados
-          
+        
             cursor.execute("""
-                  UPDATE Frete
-                  SET Peso = %s, Valor = %s, Pedagio = %s, ICMS = %s, Data_Frete = %s, Quem_Paga = %s, Peso_Ou_Valor = %s, Origem_CID = %s, Destino_CID = %s, Remetente_Cli = %s, Destinatario_Cli = %s, Funcionario = %s
-                  WHERE Num_Conhec = %s;
+                UPDATE Frete
+                SET Peso = %s, Valor = %s, Pedagio = %s, ICMS = %s, Data_Frete = %s, Quem_Paga = %s, Peso_Ou_Valor = %s, Origem_CID = %s, Destino_CID = %s, Remetente_Cli = %s, Destinatario_Cli = %s, Funcionario = %s
+                WHERE Num_Conhec = %s;
                 """,
-               (self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.funcionario, self.num_conhec)
+            (self.peso, self.valor, self.pedagio, self.icms, self.data_frete, self.quem_paga, self.peso_ou_valor, self.origem_cid, self.destino_cid, self.remetente_cli, self.destinatario_cli, self.funcionario, self.num_conhec)
             )
-             # Verificar se o comando afetou alguma linha
+            # Verificar se o comando afetou alguma linha
             #print("Linhas afetadas pelo UPDATE:", cursor.rowcount) tava debugando, n aguento mais debugar essa desgraça
             if cursor.rowcount == 0: #Isso tbm é mais para debugar (como sempre)
                 print("Nenhuma linha foi atualizada - verifique se o Num Conhecimento existe.")
@@ -189,4 +189,53 @@ class Frete:
         except Exception as e:
             connection.rollback()
             print(f"Erro ao buscar fretes: {e}")
+            return []
+
+    @staticmethod
+    def obter_media_fretes_por_cidade_estado(estado):
+        try:
+            cursor = connection.cursor()  # Ligando a conexão
+        
+            cursor.execute("""
+                SELECT  
+                    c.uf AS estado,
+                    c.nome_cid AS cidade,
+                    AVG(CASE WHEN f.Origem_CID = c.Codigo_CID THEN 1.0 ELSE 0.0 END) AS media_fretes_origem,
+                    AVG(CASE WHEN f.Destino_CID = c.Codigo_CID THEN 1.0 ELSE 0.0 END) AS media_fretes_destino
+                FROM Cidade c
+                LEFT JOIN Frete f 
+                    ON f.Origem_CID = c.Codigo_CID OR f.Destino_CID = c.Codigo_CID
+                WHERE c.uf = %s
+                GROUP BY c.uf, c.nome_cid
+                ORDER BY c.nome_cid;
+
+            """, (estado,))
+
+            # Obter os resultados da consulta
+            resultado = cursor.fetchall()
+            cursor.close()
+
+            print(f"Resultado da consulta: {resultado}")  # Para debugar o que foi retornado
+
+            # Se não encontrar dados, retorna uma lista vazia
+            if not resultado:
+                print(f"Nenhum dado encontrado para o estado {estado}")
+                return []
+
+            # Processar resultados em formato de lista de dicionários
+            fretes_processados = [
+                {
+                    "estado": row[0],
+                    "cidade": row[1],
+                    "media_fretes_origem": row[2],
+                    "media_fretes_destino": row[3],
+                }
+                for row in resultado
+            ]
+            
+            return fretes_processados
+
+        except Exception as e:
+            # Em caso de erro, reverte qualquer transação pendente e imprime a mensagem de erro
+            print(f"Erro ao buscar dados: {e}")
             return []
